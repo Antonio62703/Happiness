@@ -265,7 +265,7 @@
 
         @media (max-width: 600px) {
             .modal {
-                width: 70%;
+                width: 65%;
             }
         }
 
@@ -596,8 +596,13 @@
             const hopscotchRect = hopscotch.getBoundingClientRect();
             
             // Calculate position and divide by scale to get actual container-relative position
-            const x = (squareRect.left - hopscotchRect.left) / scale + squareRect.width / 2 - 15;
+            let x = (squareRect.left - hopscotchRect.left) / scale + squareRect.width / 2 - 15;
             const y = (squareRect.top - hopscotchRect.top) / scale + squareRect.height / 2 - 15;
+            
+            // Add slight right offset for mobile screens
+            if (window.innerWidth <= 600) {
+                x += 5;
+            }
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
