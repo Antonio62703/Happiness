@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hopscotch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'ABCStefan';
+            src: url('ABCStefan-Simple-Trial.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-slate: #3d4552;
+            --bright-yellow: #f7d765;
+            --yellow-glow: #ffe680;
+            --shadow-dark: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            animation: fadeInUp 0.8s ease-out;
+            margin-top: 100vh;
+            padding-bottom: 50vh;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hopscotch {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .hopscotch-row {
+            display: flex;
+            gap: 0;
+            position: relative;
+            width: 100%;
+            justify-content: center;
+            margin-top: -5px;
+        }
+
+        .hopscotch-row:first-of-type {
+            margin-top: 0;
+        }
+
+        .double {
+            margin-right: -5px;
+        }
+
+        .double:last-child {
+            margin-right: 0;
+        }
+
+        .hopscotch-square {
+            background: #000000;
+            border: 5px solid var(--bright-yellow);
+            position: relative;
+            cursor: pointer;
+            animation: drawSquare 0.6s ease-out backwards;
+        }
+
+        /* Single squares */
+        .single {
+            width: 275px;
+            height: 140px;
+        }
+
+        /* Double squares */
+        .double {
+            width: 140px;
+            height: 140px;
+        }
+
+        /* Top arc */
+        .arc {
+            width: 275px;
+            height: 140px;
+            background: #000000;
+            border: 5px solid var(--bright-yellow);
+            border-bottom: none;
+            border-top-left-radius: 140px;
+            border-top-right-radius: 140px;
+            margin-bottom: -5px;
+            position: relative;
+            cursor: pointer;
+            animation: drawArc 0.8s ease-out backwards;
+        }
+
+
+
+
+
+        /* Stagger animations */
+        .arc { animation-delay: 0.1s; }
+        .hopscotch-square:nth-child(1) { animation-delay: 0.2s; }
+        .hopscotch-square:nth-child(2) { animation-delay: 0.25s; }
+        .hopscotch-row:nth-child(2) .hopscotch-square { animation-delay: 0.3s; }
+        .hopscotch-row:nth-child(3) .hopscotch-square:nth-child(1) { animation-delay: 0.35s; }
+        .hopscotch-row:nth-child(3) .hopscotch-square:nth-child(2) { animation-delay: 0.4s; }
+        .hopscotch-row:nth-child(4) .hopscotch-square { animation-delay: 0.45s; }
+        .hopscotch-row:nth-child(5) .hopscotch-square:nth-child(1) { animation-delay: 0.5s; }
+        .hopscotch-row:nth-child(5) .hopscotch-square:nth-child(2) { animation-delay: 0.55s; }
+        .hopscotch-row:nth-child(6) .hopscotch-square { animation-delay: 0.6s; }
+
+        @keyframes drawSquare {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotate(-5deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        @keyframes drawArc {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .container {
+            z-index: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                transform: scale(0.85);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .container {
+                transform: scale(0.7);
+            }
+        }
+
+        /* Player dot */
+        .player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: var(--bright-yellow);
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: flash 1s ease-in-out infinite;
+        }
+
+        @keyframes flash {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+
+        .player.jumping {
+            animation: jump 0.4s ease-in-out;
+        }
+
+        @keyframes jump {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(0.9) translateY(-20px); }
+        }
+
+        /* Box numbers */
+        .box-number {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--bright-yellow);
+            font-family: 'ABCStefan', 'Fredoka', sans-serif;
+            font-size: 24px;
+            font-weight: normal;
+            pointer-events: none;
+            z-index: 5;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Box words */
+        .box-word {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--bright-yellow);
+            font-family: 'ABCStefan', 'Fredoka', sans-serif;
+            font-size: 32px;
+            font-weight: normal;
+            pointer-events: none;
+            z-index: 5;
+            text-align: center;
+            text-transform: uppercase;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Modal window */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            max-width: 400px;
+            height: 60vh;
+            background: #000000;
+            border: 5px solid var(--bright-yellow);
+            z-index: 100;
+            display: none;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: block;
+            animation: modalAppear 0.3s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .modal-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            color: var(--bright-yellow);
+            padding: 20px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+        .modal-title {
+            font-family: 'ABCStefan', 'Fredoka', sans-serif;
+            font-size: 24px;
+            font-weight: normal;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .modal-subtitle {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            font-weight: normal;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .modal-body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: normal;
+            margin-bottom: 20px;
+        }
+        
+        .modal-body:last-child {
+            padding-bottom: 100px;
+            margin-bottom: 0;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: auto;
+            margin: 8px 0 20px 0;
+            border: 2px solid var(--bright-yellow);
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal window -->
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modalContent">
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hopscotch">
+            <!-- Player dot -->
+            <div class="player" id="player"></div>
+            
+            <!-- Top Arc -->
+            <div class="arc">
+                <div class="box-number">10</div>
+                <div class="box-word">now</div>
+            </div>
+
+            <!-- Row 1: Two squares -->
+            <div class="hopscotch-row">
+                <div class="hopscotch-square double">
+                    <div class="box-number">8</div>
+                    <div class="box-word">it</div>
+                </div>
+                <div class="hopscotch-square double">
+                    <div class="box-number">9</div>
+                    <div class="box-word">go</div>
+                </div>
+            </div>
+
+            <!-- Row 2: Single square -->
+            <div class="hopscotch-row">
+                <div class="hopscotch-square single">
+                    <div class="box-number">7</div>
+                    <div class="box-word">will</div>
+                </div>
+            </div>
+
+            <!-- Row 3: Two squares -->
+            <div class="hopscotch-row">
+                <div class="hopscotch-square double">
+                    <div class="box-number">5</div>
+                    <div class="box-word">where</div>
+                </div>
+                <div class="hopscotch-square double">
+                    <div class="box-number">6</div>
+                    <div class="box-word">go</div>
+                </div>
+            </div>
+
+            <!-- Row 4: Single square -->
+            <div class="hopscotch-row">
+                <div class="hopscotch-square single">
+                    <div class="box-number">4</div>
+                    <div class="box-word">time</div>
+                </div>
+            </div>
+
+            <!-- Row 5: Two squares -->
+            <div class="hopscotch-row">
+                <div class="hopscotch-square double">
+                    <div class="box-number">2</div>
+                    <div class="box-word">all</div>
+                </div>
+                <div class="hopscotch-square double">
+                    <div class="box-number">3</div>
+                    <div class="box-word">the</div>
+                </div>
+            </div>
+
+            <!-- Row 6: Single square (base) -->
+            <div class="hopscotch-row">
+                <div class="hopscotch-square single">
+                    <div class="box-number">1</div>
+                    <div class="box-word">WHERE'D</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hopscotch game logic
+        const player = document.getElementById('player');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modalContent');
+        const squares = document.querySelectorAll('.hopscotch-square, .arc');
+        let currentPosition = 0;
+        let modalActive = false;
+        
+        // Define positions for each square (from bottom to top)
+        const positions = [
+            { square: squares[9], offset: { x: 0, y: 0 } },      // Bottom single
+            { square: squares[7], offset: { x: 0, y: 0 } },      // Left of pair
+            { square: squares[8], offset: { x: 0, y: 0 } },      // Right of pair (box 3)
+            { square: squares[6], offset: { x: 0, y: 0 } },      // Middle single
+            { square: squares[4], offset: { x: 0, y: 0 } },      // Left of pair (box 5)
+            { square: squares[5], offset: { x: 0, y: 0 } },      // Right of pair
+            { square: squares[3], offset: { x: 0, y: 0 } },      // Middle single
+            { square: squares[1], offset: { x: 0, y: 0 } },      // Left of pair
+            { square: squares[2], offset: { x: 0, y: 0 } },      // Right of pair
+            { square: squares[0], offset: { x: 0, y: 0 } }       // Top arc (win!)
+        ];
+
+        const modalContents = {
+            3: `
+                <div class="modal-title">Making Time For Play</div>
+                <div class="modal-subtitle">Adults may want to consider revisiting their childhood hobbies, according to a psychologist (2025 CNN)</div>
+                <img src="Pic1.jpg" alt="Picture 1" class="modal-image">
+                <div class="modal-body">
+                    We strongly agree with the idea that reconnecting with childhood hobbies can play an important role in adult well-being. We feel that as we grow older, play is often pushed aside in favor of productivity and responsibility, which can make everyday life feel rigid and emotionally draining. The article resonated with us because it reframes play not as something childish, but as a meaningful way to relieve stress, reconnect with creativity, and experience joy without performance pressure. From our perspective, engaging in playful activities helps create balance by offering moments of comfort and emotional grounding, reminding us that happiness does not always come from achievement but can exist in simple, playful experiences.
+                </div>
+                <img src="Pic2.jpg" alt="Picture 2" class="modal-image">
+            `,
+            5: `
+                <div class="modal-title">Getting Active</div>
+                <div class="modal-subtitle">Role of Physical Activity on Mental Health and Well-Being: A Review (PubMed Central)</div>
+                <img src="Pic3.jpg" alt="Picture 3" class="modal-image">
+                <div class="modal-body">
+                    The relationship between physical activity and mental health, showing that regular exercise is consistently associated with improved mood, reduced stress, and lower levels of anxiety and depression. The authors explain that physical activity supports mental well-being through both physiological mechanisms, such as the release of endorphins and improved sleep quality, and psychological mechanisms, including enhanced self-esteem and emotional regulation. The article emphasizes that even moderate, non-intensive forms of physical activity can provide mental health benefits, making exercise an accessible and effective strategy for supporting overall psychological well-being across different populations.
+                </div>
+                <img src="Pic4.jpg" alt="Picture 4" class="modal-image">
+            `,
+            10: `
+                <div class="modal-title" style="text-align: center;">Feedback</div>
+                <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 0;">
+                    <form id="feedbackForm" style="display: flex; flex-direction: column; gap: 20px; width: 100%; align-items: center;">
+                        <textarea id="feedbackText" placeholder="Share your feedback here..." style="width: 90%; min-height: 200px; padding: 15px; background: #000; border: none; color: var(--bright-yellow); font-family: Helvetica, Arial, sans-serif; font-size: 14px; resize: vertical; caret-color: var(--bright-yellow); outline: none;"></textarea>
+                        <button type="submit" style="padding: 10px 20px; background: var(--bright-yellow); border: none; color: #000; font-family: 'ABCStefan', 'Fredoka', sans-serif; font-size: 18px; cursor: pointer; text-transform: uppercase;">Submit</button>
+                    </form>
+                </div>
+            `
+        };
+
+        let scrollInterval = null;
+        let userHasScrolled = false;
+
+        function startAutoScroll() {
+            const modalContentEl = document.getElementById('modalContent');
+            userHasScrolled = false;
+            
+            // Clear any existing interval
+            if (scrollInterval) {
+                clearInterval(scrollInterval);
+            }
+            
+            // Simple setInterval scroll
+            scrollInterval = setInterval(() => {
+                if (userHasScrolled) {
+                    clearInterval(scrollInterval);
+                    scrollInterval = null;
+                    return;
+                }
+                
+                const maxScroll = modalContentEl.scrollHeight - modalContentEl.clientHeight;
+                
+                if (modalContentEl.scrollTop < maxScroll) {
+                    modalContentEl.scrollTop += 1;
+                } else {
+                    clearInterval(scrollInterval);
+                    scrollInterval = null;
+                }
+            }, 30);
+        }
+
+        function stopAutoScroll() {
+            userHasScrolled = true;
+            if (scrollInterval) {
+                clearInterval(scrollInterval);
+                scrollInterval = null;
+            }
+        }
+
+        // Wait for page to load, then setup listeners
+        window.addEventListener('load', function() {
+            const modalContentEl = document.getElementById('modalContent');
+            
+            modalContentEl.addEventListener('wheel', function(e) {
+                if (modalActive) {
+                    stopAutoScroll();
+                }
+            }, { passive: true });
+            
+            modalContentEl.addEventListener('touchstart', function(e) {
+                if (modalActive) {
+                    stopAutoScroll();
+                }
+            }, { passive: true });
+        });
+
+        function showModal(boxNumber) {
+            modalActive = true;
+            modalContent.innerHTML = modalContents[boxNumber];
+            modal.classList.add('active');
+            
+            // Reset everything
+            userHasScrolled = false;
+            modalContent.scrollTop = 0;
+            
+            // Add form submission handler if this is the feedback modal
+            if (boxNumber === 10) {
+                const form = document.getElementById('feedbackForm');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const feedbackText = document.getElementById('feedbackText').value;
+                        
+                        // Replace form with thank you message
+                        modalContent.innerHTML = `
+                            <div class="modal-title">Thank You!</div>
+                            <div class="modal-body">
+                                Your feedback has been received. We appreciate your time!
+                            </div>
+                        `;
+                        
+                        // Log feedback to console
+                        console.log('Feedback received:', feedbackText);
+                        
+                        // Auto-close after 2 seconds
+                        setTimeout(() => {
+                            hideModal();
+                        }, 2000);
+                    });
+                }
+            } else {
+                // Start auto-scroll after a delay for non-feedback modals
+                setTimeout(() => {
+                    startAutoScroll();
+                }, 600);
+            }
+        }
+
+        function hideModal() {
+            modalActive = false;
+            modal.classList.remove('active');
+            stopAutoScroll();
+        }
+
+        function updatePlayerPosition() {
+            const pos = positions[currentPosition];
+            const rect = pos.square.getBoundingClientRect();
+            const containerRect = document.querySelector('.hopscotch').getBoundingClientRect();
+            
+            const x = rect.left - containerRect.left + rect.width / 2 - 15 + pos.offset.x;
+            const y = rect.top - containerRect.top + rect.height / 2 - 15 + pos.offset.y;
+            
+            player.style.left = x + 'px';
+            player.style.top = y + 'px';
+
+            // Smooth camera follow
+            const playerAbsoluteY = rect.top + rect.height / 2;
+            const targetScroll = window.scrollY + playerAbsoluteY - window.innerHeight / 2;
+            
+            window.scrollTo({
+                top: targetScroll,
+                behavior: 'smooth'
+            });
+
+            // Show modal at boxes 3, 5, and 10 (positions 2, 4, and 9 in 0-indexed array)
+            if (currentPosition === 2) {
+                setTimeout(() => {
+                    showModal(3);
+                }, 100);
+            } else if (currentPosition === 4) {
+                setTimeout(() => {
+                    showModal(5);
+                }, 100);
+            } else if (currentPosition === 9) {
+                setTimeout(() => {
+                    showModal(10);
+                }, 100);
+            }
+        }
+
+        // Initialize player position at bottom and scroll to it
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updatePlayerPosition();
+            }, 100);
+        });
+
+        // Move player on click/tap
+        document.addEventListener('click', (e) => {
+            // If modal is active, only close if clicking outside the modal content
+            if (modalActive) {
+                // Check if click is inside modal content
+                const modalContentEl = document.getElementById('modalContent');
+                if (!modalContentEl.contains(e.target)) {
+                    hideModal();
+                }
+                return;
+            }
+
+            if (currentPosition < positions.length - 1) {
+                currentPosition++;
+                player.classList.add('jumping');
+                
+                setTimeout(() => {
+                    player.classList.remove('jumping');
+                }, 400);
+                
+                updatePlayerPosition();
+            } else {
+                // At the end, click once more to restart
+                currentPosition = 0;
+                player.classList.add('jumping');
+                
+                setTimeout(() => {
+                    player.classList.remove('jumping');
+                }, 400);
+                
+                updatePlayerPosition();
+            }
+        });
+
+        // Update position on window resize
+        window.addEventListener('resize', updatePlayerPosition);
+    </script>
+</body>
+</html>
