@@ -266,6 +266,19 @@
         @media (max-width: 600px) {
             .modal {
                 width: 65%;
+                top: 40%;
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
+            
+            .modal-subtitle {
+                font-size: 13px;
+            }
+            
+            .modal-body {
+                font-size: 12px;
             }
         }
 
@@ -332,6 +345,26 @@
             height: auto;
             margin: 8px 0 20px 0;
             border: 2px solid var(--bright-yellow);
+        }
+
+        /* Tap instruction */
+        .tap-instruction {
+            text-align: center;
+            color: var(--bright-yellow);
+            font-family: 'ABCStefan', 'Fredoka', sans-serif;
+            font-size: 32px;
+            margin-top: 30px;
+            text-transform: uppercase;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
         }
     </style>
 </head>
@@ -413,6 +446,9 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Tap instruction -->
+        <div class="tap-instruction">Tap!</div>
     </div>
 
     <script>
