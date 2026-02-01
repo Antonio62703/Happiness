@@ -179,7 +179,7 @@
 
         /* Player dot */
         .player {
-            position: fixed;
+            position: absolute;
             width: 30px;
             height: 30px;
             background: var(--bright-yellow);
@@ -336,11 +336,10 @@
         </div>
     </div>
 
-    <!-- Player dot (outside scaled container) -->
-    <div class="player" id="player"></div>
-
     <div class="container">
         <div class="hopscotch">
+            <!-- Player dot -->
+            <div class="player" id="player"></div>
             
             <!-- Top Arc -->
             <div class="arc">
@@ -570,10 +569,11 @@
         function updatePlayerPosition() {
             const pos = positions[currentPosition];
             const rect = pos.square.getBoundingClientRect();
+            const containerRect = document.querySelector('.hopscotch').getBoundingClientRect();
             
-            // Calculate center of the square in viewport coordinates
-            const x = rect.left + rect.width / 2 - 15;
-            const y = rect.top + rect.height / 2 - 15;
+            // Calculate position relative to the hopscotch container
+            const x = rect.left - containerRect.left + rect.width / 2 - 15;
+            const y = rect.top - containerRect.top + rect.height / 2 - 15;
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
@@ -586,15 +586,6 @@
                 top: targetScroll,
                 behavior: 'smooth'
             });
-
-            // Update position after scroll completes
-            setTimeout(() => {
-                const updatedRect = pos.square.getBoundingClientRect();
-                const updatedX = updatedRect.left + updatedRect.width / 2 - 15;
-                const updatedY = updatedRect.top + updatedRect.height / 2 - 15;
-                player.style.left = updatedX + 'px';
-                player.style.top = updatedY + 'px';
-            }, 500);
 
             // Show modal at boxes 3, 5, and 10 (positions 2, 4, and 9 in 0-indexed array)
             if (currentPosition === 2) {
@@ -655,19 +646,6 @@
 
         // Update position on window resize
         window.addEventListener('resize', updatePlayerPosition);
-        
-        // Update position on scroll to keep it aligned
-        window.addEventListener('scroll', () => {
-            const pos = positions[currentPosition];
-            const rect = pos.square.getBoundingClientRect();
-            
-            // Calculate center of the square in viewport coordinates
-            const x = rect.left + rect.width / 2 - 15;
-            const y = rect.top + rect.height / 2 - 15;
-            
-            player.style.left = x + 'px';
-            player.style.top = y + 'px';
-        });
     </script>
 </body>
 </html>
