@@ -576,29 +576,34 @@
             const pos = positions[currentPosition];
             const square = pos.square;
             const hopscotch = document.querySelector('.hopscotch');
+            const container = document.querySelector('.container');
             
-            // Calculate offset relative to hopscotch container
-            let x = 0;
-            let y = 0;
-            let element = square;
+            // Get the scale factor from the container transform
+            const computedStyle = window.getComputedStyle(container);
+            const transform = computedStyle.transform;
+            let scale = 1;
             
-            // Sum up offsets from all parents until we reach hopscotch
-            while (element && element !== hopscotch) {
-                x += element.offsetLeft;
-                y += element.offsetTop;
-                element = element.offsetParent;
+            if (transform && transform !== 'none') {
+                const matrix = transform.match(/matrix.*\((.+)\)/);
+                if (matrix) {
+                    const values = matrix[1].split(', ');
+                    scale = parseFloat(values[0]);
+                }
             }
             
-            // Center the player on the square
-            x += square.offsetWidth / 2 - 15;
-            y += square.offsetHeight / 2 - 15;
+            // Get bounding rectangles
+            const squareRect = square.getBoundingClientRect();
+            const hopscotchRect = hopscotch.getBoundingClientRect();
+            
+            // Calculate position and divide by scale to get actual container-relative position
+            const x = (squareRect.left - hopscotchRect.left) / scale + squareRect.width / 2 - 15;
+            const y = (squareRect.top - hopscotchRect.top) / scale + squareRect.height / 2 - 15;
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
 
-            // Smooth camera follow using getBoundingClientRect for viewport positioning
-            const rect = square.getBoundingClientRect();
-            const playerAbsoluteY = rect.top + rect.height / 2;
+            // Smooth camera follow
+            const playerAbsoluteY = squareRect.top + squareRect.height / 2;
             const targetScroll = window.scrollY + playerAbsoluteY - window.innerHeight / 2;
             
             window.scrollTo({
