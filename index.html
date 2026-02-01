@@ -179,7 +179,7 @@
 
         /* Player dot */
         .player {
-            position: absolute;
+            position: fixed;
             width: 30px;
             height: 30px;
             background: var(--bright-yellow);
@@ -188,6 +188,7 @@
             z-index: 10;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             animation: flash 1s ease-in-out infinite;
+            pointer-events: none;
         }
 
         @keyframes flash {
@@ -335,10 +336,11 @@
         </div>
     </div>
 
+    <!-- Player dot (outside scaled container) -->
+    <div class="player" id="player"></div>
+
     <div class="container">
         <div class="hopscotch">
-            <!-- Player dot -->
-            <div class="player" id="player"></div>
             
             <!-- Top Arc -->
             <div class="arc">
@@ -568,24 +570,10 @@
         function updatePlayerPosition() {
             const pos = positions[currentPosition];
             const rect = pos.square.getBoundingClientRect();
-            const containerRect = document.querySelector('.hopscotch').getBoundingClientRect();
-            const container = document.querySelector('.container');
             
-            // Get the scale factor applied to the container
-            const computedStyle = window.getComputedStyle(container);
-            const transform = computedStyle.transform;
-            let scale = 1;
-            
-            if (transform && transform !== 'none') {
-                const matrix = transform.match(/matrix\(([^)]+)\)/);
-                if (matrix) {
-                    const values = matrix[1].split(', ');
-                    scale = parseFloat(values[0]); // scaleX value
-                }
-            }
-            
-            const x = rect.left - containerRect.left + rect.width / 2 - 15 + pos.offset.x;
-            const y = rect.top - containerRect.top + rect.height / 2 - 15 + pos.offset.y;
+            // Calculate center of the square in viewport coordinates
+            const x = rect.left + rect.width / 2 - 15;
+            const y = rect.top + rect.height / 2 - 15;
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
