@@ -575,10 +575,23 @@
         function updatePlayerPosition() {
             const pos = positions[currentPosition];
             const square = pos.square;
+            const hopscotch = document.querySelector('.hopscotch');
             
-            // Use offsetLeft/offsetTop for positioning within the same container
-            const x = square.offsetLeft + square.offsetWidth / 2 - 15;
-            const y = square.offsetTop + square.offsetHeight / 2 - 15;
+            // Calculate offset relative to hopscotch container
+            let x = 0;
+            let y = 0;
+            let element = square;
+            
+            // Sum up offsets from all parents until we reach hopscotch
+            while (element && element !== hopscotch) {
+                x += element.offsetLeft;
+                y += element.offsetTop;
+                element = element.offsetParent;
+            }
+            
+            // Center the player on the square
+            x += square.offsetWidth / 2 - 15;
+            y += square.offsetHeight / 2 - 15;
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
