@@ -574,17 +574,17 @@
 
         function updatePlayerPosition() {
             const pos = positions[currentPosition];
-            const rect = pos.square.getBoundingClientRect();
-            const containerRect = document.querySelector('.hopscotch').getBoundingClientRect();
+            const square = pos.square;
             
-            // Calculate position relative to the hopscotch container
-            const x = rect.left - containerRect.left + rect.width / 2 - 15;
-            const y = rect.top - containerRect.top + rect.height / 2 - 15;
+            // Use offsetLeft/offsetTop for positioning within the same container
+            const x = square.offsetLeft + square.offsetWidth / 2 - 15;
+            const y = square.offsetTop + square.offsetHeight / 2 - 15;
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
 
-            // Smooth camera follow
+            // Smooth camera follow using getBoundingClientRect for viewport positioning
+            const rect = square.getBoundingClientRect();
             const playerAbsoluteY = rect.top + rect.height / 2;
             const targetScroll = window.scrollY + playerAbsoluteY - window.innerHeight / 2;
             
