@@ -188,6 +188,10 @@
             z-index: 10;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             animation: flash 1s ease-in-out infinite;
+            left: 50%;
+            top: 50%;
+            margin-left: -15px;
+            margin-top: -15px;
         }
 
         @keyframes flash {
@@ -597,17 +601,18 @@
 
         function updatePlayerPosition() {
             const pos = positions[currentPosition];
-            const hopscotchRect = document.querySelector('.hopscotch').getBoundingClientRect();
+            const hopscotch = document.querySelector('.hopscotch');
             
-            // Get the square's position relative to the hopscotch container
+            // Get positions without transforms
             const squareRect = pos.square.getBoundingClientRect();
+            const hopscotchRect = hopscotch.getBoundingClientRect();
             
-            // Calculate center position relative to hopscotch container
-            const x = squareRect.left - hopscotchRect.left + squareRect.width / 2 - 15;
-            const y = squareRect.top - hopscotchRect.top + squareRect.height / 2 - 15;
+            // Calculate position relative to hopscotch (this accounts for scaling)
+            const relativeX = ((squareRect.left + squareRect.width / 2) - hopscotchRect.left) / (hopscotchRect.width / hopscotch.offsetWidth);
+            const relativeY = ((squareRect.top + squareRect.height / 2) - hopscotchRect.top) / (hopscotchRect.height / hopscotch.offsetHeight);
             
-            player.style.left = x + 'px';
-            player.style.top = y + 'px';
+            player.style.left = relativeX + 'px';
+            player.style.top = relativeY + 'px';
 
             // Reveal the word in the current square
             const currentWord = pos.square.querySelector('.box-word');
