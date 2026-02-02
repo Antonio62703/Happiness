@@ -294,7 +294,6 @@
             font-family: 'ABCStefan', 'Fredoka', sans-serif;
             font-size: 28px;
             z-index: 50;
-            animation: pulse 1.5s ease-in-out infinite;
             pointer-events: none;
             user-select: none;
         }
@@ -303,17 +302,6 @@
             .tap-instruction {
                 font-size: 48px;
                 bottom: 100px;
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-                transform: translateX(-50%) scale(1);
-            }
-            50% {
-                opacity: 0.5;
-                transform: translateX(-50%) scale(1.05);
             }
         }
 
@@ -609,11 +597,14 @@
 
         function updatePlayerPosition() {
             const pos = positions[currentPosition];
-            const rect = pos.square.getBoundingClientRect();
-            const containerRect = document.querySelector('.hopscotch').getBoundingClientRect();
+            const hopscotchRect = document.querySelector('.hopscotch').getBoundingClientRect();
             
-            const x = rect.left - containerRect.left + rect.width / 2 - 15 + pos.offset.x;
-            const y = rect.top - containerRect.top + rect.height / 2 - 15 + pos.offset.y;
+            // Get the square's position relative to the hopscotch container
+            const squareRect = pos.square.getBoundingClientRect();
+            
+            // Calculate center position relative to hopscotch container
+            const x = squareRect.left - hopscotchRect.left + squareRect.width / 2 - 15;
+            const y = squareRect.top - hopscotchRect.top + squareRect.height / 2 - 15;
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
@@ -625,7 +616,7 @@
             }
 
             // Smooth camera follow
-            const playerAbsoluteY = rect.top + rect.height / 2;
+            const playerAbsoluteY = squareRect.top + squareRect.height / 2;
             const targetScroll = window.scrollY + playerAbsoluteY - window.innerHeight / 2;
             
             window.scrollTo({
