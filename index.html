@@ -36,7 +36,6 @@
             padding: 2rem;
             overflow-x: hidden;
             overflow-y: auto;
-            touch-action: manipulation;
         }
 
         .container {
@@ -189,7 +188,6 @@
             z-index: 10;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             animation: flash 1s ease-in-out infinite;
-            pointer-events: none;
         }
 
         @keyframes flash {
@@ -246,6 +244,12 @@
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .box-word.revealed {
+            opacity: 1;
         }
 
         /* Modal window */
@@ -264,30 +268,6 @@
             padding: 20px;
         }
 
-        @media (max-width: 600px) {
-            .modal {
-                width: 65%;
-                top: 40%;
-            }
-            
-            .modal-title {
-                font-size: 20px;
-            }
-            
-            .modal-subtitle {
-                font-size: 13px;
-            }
-            
-            .modal-body {
-                font-size: 12px;
-            }
-            
-            .tap-instruction {
-                font-size: 120px;
-                margin-top: 200px;
-            }
-        }
-
         .modal.active {
             display: block;
             animation: modalAppear 0.3s ease-out;
@@ -301,6 +281,39 @@
             to {
                 opacity: 1;
                 transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Tap instruction */
+        .tap-instruction {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--bright-yellow);
+            font-family: 'ABCStefan', 'Fredoka', sans-serif;
+            font-size: 28px;
+            z-index: 50;
+            animation: pulse 1.5s ease-in-out infinite;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        @media (max-width: 768px) {
+            .tap-instruction {
+                font-size: 48px;
+                bottom: 100px;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateX(-50%) scale(1.05);
             }
         }
 
@@ -352,28 +365,12 @@
             margin: 8px 0 20px 0;
             border: 2px solid var(--bright-yellow);
         }
-
-        /* Tap instruction */
-        .tap-instruction {
-            text-align: center;
-            color: var(--bright-yellow);
-            font-family: 'ABCStefan', 'Fredoka', sans-serif;
-            font-size: 32px;
-            margin-top: 30px;
-            text-transform: uppercase;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
     </style>
 </head>
 <body>
+    <!-- Tap instruction -->
+    <div class="tap-instruction" id="tapInstruction">tap!</div>
+    
     <!-- Modal window -->
     <div class="modal" id="modal">
         <div class="modal-content" id="modalContent">
@@ -451,9 +448,6 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Tap instruction -->
-        <div class="tap-instruction">Tap!</div>
     </div>
 
     <script>
@@ -615,41 +609,23 @@
 
         function updatePlayerPosition() {
             const pos = positions[currentPosition];
-            const square = pos.square;
-            const hopscotch = document.querySelector('.hopscotch');
-            const container = document.querySelector('.container');
+            const rect = pos.square.getBoundingClientRect();
+            const containerRect = document.querySelector('.hopscotch').getBoundingClientRect();
             
-            // Get the scale factor from the container transform
-            const computedStyle = window.getComputedStyle(container);
-            const transform = computedStyle.transform;
-            let scale = 1;
-            
-            if (transform && transform !== 'none') {
-                const matrix = transform.match(/matrix.*\((.+)\)/);
-                if (matrix) {
-                    const values = matrix[1].split(', ');
-                    scale = parseFloat(values[0]);
-                }
-            }
-            
-            // Get bounding rectangles
-            const squareRect = square.getBoundingClientRect();
-            const hopscotchRect = hopscotch.getBoundingClientRect();
-            
-            // Calculate position and divide by scale to get actual container-relative position
-            let x = (squareRect.left - hopscotchRect.left) / scale + squareRect.width / 2 - 15;
-            const y = (squareRect.top - hopscotchRect.top) / scale + squareRect.height / 2 - 15;
-            
-            // Add slight right offset for mobile screens
-            if (window.innerWidth <= 600) {
-                x += 10;
-            }
+            const x = rect.left - containerRect.left + rect.width / 2 - 15 + pos.offset.x;
+            const y = rect.top - containerRect.top + rect.height / 2 - 15 + pos.offset.y;
             
             player.style.left = x + 'px';
             player.style.top = y + 'px';
 
+            // Reveal the word in the current square
+            const currentWord = pos.square.querySelector('.box-word');
+            if (currentWord) {
+                currentWord.classList.add('revealed');
+            }
+
             // Smooth camera follow
-            const playerAbsoluteY = squareRect.top + squareRect.height / 2;
+            const playerAbsoluteY = rect.top + rect.height / 2;
             const targetScroll = window.scrollY + playerAbsoluteY - window.innerHeight / 2;
             
             window.scrollTo({
