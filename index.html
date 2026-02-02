@@ -302,8 +302,8 @@
 
         /* Tap instruction */
         .tap-instruction {
-            position: absolute;
-            bottom: -80px;
+            position: fixed;
+            bottom: 60px;
             left: 50%;
             transform: translateX(-50%);
             color: var(--bright-yellow);
@@ -317,7 +317,7 @@
         @media (max-width: 768px) {
             .tap-instruction {
                 font-size: 48px;
-                bottom: -120px;
+                bottom: 100px;
             }
         }
 
@@ -372,6 +372,9 @@
     </style>
 </head>
 <body>
+    <!-- Tap instruction -->
+    <div class="tap-instruction" id="tapInstruction">tap!</div>
+    
     <!-- Modal window -->
     <div class="modal" id="modal">
         <div class="modal-content" id="modalContent">
@@ -379,9 +382,6 @@
     </div>
 
     <div class="container">
-        <!-- Tap instruction -->
-        <div class="tap-instruction" id="tapInstruction">tap!</div>
-        
         <div class="hopscotch">
             <!-- Player dot -->
             <div class="player" id="player"></div>
