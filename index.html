@@ -576,20 +576,50 @@
             if (boxNumber === 10) {
                 const form = document.getElementById('feedbackForm');
                 if (form) {
-                    form.addEventListener('submit', function(e) {
+                    form.addEventListener('submit', async function(e) {
                         e.preventDefault();
                         const feedbackText = document.getElementById('feedbackText').value;
                         
-                        // Replace form with thank you message
-                        modalContent.innerHTML = `
-                            <div class="modal-title">Thank You!</div>
-                            <div class="modal-body">
-                                Your feedback has been received. We appreciate your time!
-                            </div>
-                        `;
-                        
-                        // Log feedback to console
-                        console.log('Feedback received:', feedbackText);
+                        // Send to Formspree
+                        try {
+                            const response = await fetch('https://formspree.io/f/xbljaywz', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    email: 'antonio27chen@gmail.com',
+                                    message: feedbackText
+                                })
+                            });
+                            
+                            if (response.ok) {
+                                // Replace form with thank you message
+                                modalContent.innerHTML = `
+                                    <div class="modal-title">Thank You!</div>
+                                    <div class="modal-body">
+                                        Your feedback has been received. We appreciate your time!
+                                    </div>
+                                `;
+                            } else {
+                                // Show error message
+                                modalContent.innerHTML = `
+                                    <div class="modal-title">Oops!</div>
+                                    <div class="modal-body">
+                                        There was an error sending your feedback. Please try again.
+                                    </div>
+                                `;
+                            }
+                        } catch (error) {
+                            console.error('Error submitting feedback:', error);
+                            // Show error message
+                            modalContent.innerHTML = `
+                                <div class="modal-title">Oops!</div>
+                                <div class="modal-body">
+                                    There was an error sending your feedback. Please try again.
+                                </div>
+                            `;
+                        }
                         
                         // Auto-close after 2 seconds
                         setTimeout(() => {
